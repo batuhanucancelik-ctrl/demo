@@ -1,0 +1,40 @@
+// --- MODEL YÜKLEME ---
+        const loader = new GLTFLoader();
+        
+        // Dosya adındaki boşlukları tarayıcı doğru okusun diye encode ediyoruz
+        const modelUrl = 'cute chibi girl 3d model_Clone1.glb';
+
+        loader.load(modelUrl, function (gltf) {
+            const model = gltf.scene;
+            scene.add(model);
+            
+            // Modeli otomatik ölçeklendir (Çok büyük veya küçükse sahnede görünmesi için)
+            const box = new THREE.Box3().setFromObject(model);
+            const size = box.getSize(new THREE.Vector3()).length();
+            const center = box.getCenter(new THREE.Vector3());
+
+            model.position.x += (model.position.x - center.x);
+            model.position.y += (model.position.y - center.y);
+            model.position.z += (model.position.z - center.z);
+
+            camera.near = size / 100;
+            camera.far = size * 100;
+            camera.updateProjectionMatrix();
+
+            camera.position.copy(center);
+            camera.position.x += size / 1.5;
+            camera.position.y += size / 4;
+            camera.position.z += size / 1.5;
+            camera.lookAt(center);
+
+            controls.maxDistance = size * 5;
+            controls.target.copy(center);
+            controls.update();
+
+            document.getElementById('loader').style.display = 'none';
+        }, 
+        (xhr) => { console.log((xhr.loaded / xhr.total * 100) + '% yüklendi'); },
+        (error) => { 
+            console.error('Hata oluştu:', error);
+            document.getElementById('loader').innerHTML = 'Model yüklenirken hata oluştu!';
+        });
